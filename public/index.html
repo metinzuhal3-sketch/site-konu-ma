@@ -1,90 +1,88 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canlı Sınıf Sohbeti</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <title>Canlı Sohbet Girişi</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #1e293b;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            width: 320px;
+            text-align: center;
+        }
+        h2 {
+            color: #818cf8;
+            margin-bottom: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background-color: #334155;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            color: white;
+            box-sizing: border-box;
+        }
+        input::placeholder {
+            color: #94a3b8;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            color: white;
+        }
+        .btn-login {
+            background-color: #6366f1;
+        }
+        .btn-login:hover {
+            background-color: #4f46e5;
+        }
+        .btn-register {
+            background-color: #475569;
+        }
+        .btn-register:hover {
+            background-color: #334155;
+        }
+    </style>
 </head>
-<body class="bg-gray-900 text-gray-100 font-sans h-screen flex flex-col overflow-hidden">
+<body>
 
-    <!-- Sabit Duyuru Banner -->
-    <div id="announcement-banner" class="hidden bg-indigo-600 text-white text-center py-2 px-4 font-semibold text-sm shadow-lg">
-        <span id="announcement-text">📢 Duyuru</span>
-    </div>
-
-    <!-- Auth Ekranı (Giriş / Kayıt) -->
-    <div id="auth-screen" class="fixed inset-0 bg-gray-900 flex items-center justify-center z-50">
-        <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-96 border border-gray-700">
-            <h2 class="text-2xl font-bold mb-6 text-center text-indigo-400">Canlı Sohbet Girişi</h2>
-            <div id="auth-error" class="hidden bg-red-500/20 border border-red-500 text-red-300 text-xs p-2 rounded mb-4"></div>
-            <input id="auth-fullname" type="text" placeholder="Ad Soyad" class="w-full bg-gray-700 mb-3 p-3 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <input id="auth-username" type="text" placeholder="Kullanıcı Adı" class="w-full bg-gray-700 mb-3 p-3 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <input id="auth-password" type="password" placeholder="Şifre" class="w-full bg-gray-700 mb-4 p-3 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <div class="flex gap-2">
-                <button onclick="login()" class="w-1/2 bg-indigo-600 hover:bg-indigo-700 font-semibold py-2 rounded transition">Giriş Yap</button>
-                <button onclick="register()" class="w-1/2 bg-gray-600 hover:bg-gray-700 font-semibold py-2 rounded transition">Kayıt Ol</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Ana Uygulama Arayüzü -->
-    <div id="app" class="flex flex-1 overflow-hidden">
+    <div class="container">
+        <h2>Canlı Sohbet Girişi</h2>
+        <input type="text" id="username" placeholder="Kullanıcı Adı">
+        <input type="text" id="name" placeholder="İsim">
+        <input type="password" id="password" placeholder="Şifre">
         
-        <!-- Sol Panel: Kanal Listesi -->
-        <div class="w-56 bg-gray-800 border-r border-gray-700 flex flex-col">
-            <div class="p-4 border-b border-gray-700 font-bold text-base text-indigo-400 flex justify-between items-center">
-                <span>💬 Canlı Sohbet</span>
-                <button id="admin-btn" onclick="openAdminModal()" class="hidden text-xs bg-red-600 px-2 py-1 rounded hover:bg-red-700">Admin</button>
-            </div>
-            <div class="flex-1 p-3 space-y-1 overflow-y-auto">
-                <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Kanallar</div>
-                <button onclick="switchChannel('duyurular')" id="chan-duyurular" class="w-full text-left p-2 rounded hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-300">
-                    <i class="fa-solid fa-bullhorn text-yellow-500"></i> duyurular
-                </button>
-                <button onclick="switchChannel('genel')" id="chan-genel" class="w-full text-left p-2 rounded bg-gray-700 flex items-center gap-2 text-sm text-white">
-                    <i class="fa-solid fa-hashtag text-gray-400"></i> genel-sohbet
-                </button>
-                <button onclick="switchChannel('oyun')" id="chan-oyun" class="w-full text-left p-2 rounded hover:bg-gray-700 flex items-center gap-2 text-sm text-gray-300">
-                    <i class="fa-solid fa-gamepad text-green-500"></i> serbest-kürsü
-                </button>
-            </div>
-            <!-- Profil Bilgisi -->
-            <div class="p-3 bg-gray-850 border-t border-gray-700 flex items-center gap-2">
-                <img id="user-avatar" src="" class="w-8 h-8 rounded-full bg-gray-600">
-                <div class="overflow-hidden">
-                    <div id="user-fullname" class="font-semibold text-xs truncate"></div>
-                    <div id="user-role" class="text-[10px] text-indigo-400"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Orta / Tam Ekran: Canlı Sohbet Akışı -->
-        <div class="flex-1 flex flex-col bg-gray-900">
-            <div class="p-3 px-6 border-b border-gray-800 font-bold flex items-center gap-2 text-sm">
-                <span class="text-gray-400">#</span>
-                <span id="current-channel-title">genel-sohbet</span>
-            </div>
-            <div id="messages-container" class="flex-1 p-6 overflow-y-auto space-y-4"></div>
-            
-            <!-- Mesaj Girdi Kutusu -->
-            <div class="p-4 bg-gray-900">
-                <div class="bg-gray-800 rounded-lg flex items-center p-2 border border-gray-700 focus-within:border-indigo-500 shadow-lg">
-                    <input id="message-input" type="text" placeholder="Mesaj yaz... (/admin yazarak panele ulaşabilirsin)" class="w-full bg-transparent px-3 py-1 focus:outline-none text-sm" onkeypress="handleKeyPress(event)">
-                    <button onclick="sendMessage()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold transition">Gönder</button>
-                </div>
-            </div>
+        <div class="btn-group">
+            <button class="btn-login" onclick="login()">Giriş Yap</button>
+            <button class="btn-register" onclick="register()">Kayıt Ol</button>
         </div>
     </div>
 
-    <!-- Modal 1: Secret Admin Pass Modal -->
-    <div id="admin-auth-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-        <div class="bg-gray-800 p-6 rounded-xl border border-red-500/30 w-80 shadow-2xl">
-            <h3 class="text-lg font-bold text-red-400 mb-2"><i class="fa-solid fa-lock"></i> Admin Doğrulama</h3>
-            <p class="text-xs text-gray-400 mb-4">Şifreyi giriniz (`baba`):</p>
-            <input id="admin-pass-input" type="password" placeholder="Şifre" class="w-full bg-gray-700 p-2 rounded mb-3 text-sm focus:outline-none border border-gray-600">
-            <div class="flex justify-end gap-2">
-                <button onclick="closeAdminAuthModal()" class="px-3 py-1 bg-gray-600 rounded text-xs">İptal</button>
-                <button onclick="submitAdminPass()" class="
+    <!-- JavaScript Dosyası Bağlantısı -->
+    <script src="/app.js"></script>
+</body>
+</html>
