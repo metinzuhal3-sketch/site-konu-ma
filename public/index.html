@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Canlı Sohbet Girişi</title>
+    <title>Canlı Sohbet Uygulaması</title>
     <style>
         body {
             background-color: #0f172a;
@@ -15,12 +15,12 @@
             height: 100vh;
             margin: 0;
         }
-        .container {
+        .container, #chat-container {
             background-color: #1e293b;
             padding: 30px;
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-            width: 320px;
+            width: 350px;
             text-align: center;
         }
         h2 {
@@ -54,23 +54,39 @@
             font-weight: bold;
             color: white;
         }
-        .btn-login {
-            background-color: #6366f1;
+        .btn-login { background-color: #6366f1; }
+        .btn-login:hover { background-color: #4f46e5; }
+        .btn-register { background-color: #475569; }
+        .btn-register:hover { background-color: #334155; }
+        
+        /* Sohbet Ekranı Alanı (Başlangıçta gizli) */
+        #chat-container {
+            display: none;
+            width: 400px;
+            height: 450px;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
         }
-        .btn-login:hover {
-            background-color: #4f46e5;
+        #chat-messages {
+            flex: 1;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            border-radius: 6px;
+            padding: 10px;
+            overflow-y: auto;
+            margin-bottom: 10px;
         }
-        .btn-register {
-            background-color: #475569;
-        }
-        .btn-register:hover {
-            background-color: #334155;
+        .chat-input-area {
+            display: flex;
+            gap: 5px;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
+    <!-- Giriş Ekranı -->
+    <div class="container" id="login-container">
         <h2>Canlı Sohbet Girişi</h2>
         <input type="text" id="username" placeholder="Kullanıcı Adı">
         <input type="text" id="name" placeholder="İsim">
@@ -82,7 +98,18 @@
         </div>
     </div>
 
-    <!-- JavaScript Dosyası Bağlantısı -->
+    <!-- Sohbet Odası Ekranı (Giriş yapınca açılacak) -->
+    <div id="chat-container" style="display: none;">
+        <h2>Sohbet Odası</h2>
+        <div id="chat-messages">
+            <p style="color: #94a3b8; text-align: center;">Sohbet akışı başladı...</p>
+        </div>
+        <div class="chat-input-area">
+            <input type="text" id="message-input" placeholder="Mesajınızı yazın...">
+            <button class="btn-login" style="flex: 0.4;" onclick="sendMessage()">Gönder</button>
+        </div>
+    </div>
+
     <script src="/app.js"></script>
 </body>
 </html>
